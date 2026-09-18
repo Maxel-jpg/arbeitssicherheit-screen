@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbeitssicherheit Slideshow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        .slideshow-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .slide img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        .info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 10;
+        }
+        
+        .loading {
+            color: white;
+            text-align: center;
+            margin-top: 50px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slideshow-container" id="slideshow"></div>
+    <div class="info">
+        <span id="current">1</span> / <span id="total">0</span>
+    </div>
+
+    <script>
+        // ===== HIER MUSST DU DEN ONEDRIVE-LINK EINTRAGEN! =====
+        const ONEDRIVE_LINK = "DEIN_ONEDRIVE_LINK_HIER";
+        const SLIDE_DURATION = 30000; // 30 Sekunden pro Bild
+        
+        let slides = [];
+        let currentSlide = 0;
+
+        async function loadImages() {
+            try {
+                document.getElementById("slideshow").innerHTML = 
+                    '<div class="loading">Lade Bilder...</div>';
+                
+                // Lädt die Bilder aus OneDrive
+                const response = await fetch(ONEDRIVE_LINK + "&download=1");
+                const html = await response.text();
+                
+                // Extrahiert Bild-URLs
+                const imageRegex = /href="([^"]*\.(jpg|jpeg|png|gif))"/gi;
+                let match;
+                slides = [];
+                
+                while ((match = imageRegex.exec(html)) !== null) {
+                    slides.push(match[1]);
+                }
+                
+                if (slides.length === 0) {
+                    document.getElementById("slideshow").innerHTML = 
+                        '<div class="loading"><h2>Keine Bilder gefunden!</h2><p>Überprüfe den OneDrive-Link.</p></div>';
+                    return;
+                }
+                
+                document.getElementById("total").textContent = slides.length;
+                displaySlide();
+                
+                // Automatischer Bildwechsel
+                setInterval(() => {
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    displaySlide();
+                }, SLIDE_DURATION);
+                
+            } catch (error) {
+                document.getElementById("slideshow").innerHTML = 
+                    '<div class="loading"><h2>Fehler beim Laden!</h2><p>' + error.message + '</p></div>';
+                console.error("Fehler:", error);
+            }
+        }
+
+        function displaySlide() {
+            const container = document.getElementById("slideshow");
+            container.innerHTML = `
+                <div class="slide active">
+                    <img src="${slides[currentSlide]}" alt="Slide ${currentSlide + 1}">
+                </div>
+            `;
+            document.getElementById("current").textContent = currentSlide + 1;
+        }
+
+        // Bilder beim Start laden
+        loadImages();
+        
+        // Alle 2 Minuten neu laden (falls neue Bilder hinzugefügt wurden)
+        setInterval(loadImages, 120000);
+    </script>
+</body>
+</html>
