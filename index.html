@@ -61,35 +61,29 @@
     </div>
 
     <script>
-        // ===== HIER MUSST DU DEINE BILD-URLS EINTRAGEN! =====
-        // Beispiel: Lade Bilder direkt aus OneDrive mit ?download=1
+        var IMAGE_URLS = [
+            "DEIN_BILD_LINK_HIER"
+        ];
         
-        const IMAGE_URLS = [
-    "https://siemens-my.sharepoint.com/personal/maximilian_haep_siemens_com/_layouts/15/embed.aspx?UniqueId=f7481459-082b-4312-a451-e51c8bdf267b"
-];
-        
-        const SLIDE_DURATION = 30000; // 30 Sekunden pro Bild
-        
-        let currentSlide = 0;
+        var SLIDE_DURATION = 30000;
+        var currentSlide = 0;
 
         function displaySlide() {
             if (IMAGE_URLS.length === 0) {
                 document.getElementById("slideshow").innerHTML = 
-                    '<div class="loading"><h2>Keine Bilder konfiguriert!</h2><p>Bitte Bild-URLs in der HTML-Datei eintragen.</p></div>';
+                    '<div class="loading"><h2>Keine Bilder konfiguriert!</h2></div>';
                 return;
             }
             
-            const container = document.getElementById("slideshow");
-            container.innerHTML = `<img src="${IMAGE_URLS[currentSlide]}" alt="Slide ${currentSlide + 1}">`;
+            var container = document.getElementById("slideshow");
+            container.innerHTML = '<img src="' + IMAGE_URLS[currentSlide] + '" alt="Slide">';
             document.getElementById("current").textContent = currentSlide + 1;
             document.getElementById("total").textContent = IMAGE_URLS.length;
         }
 
-        // Slideshow starten
         if (IMAGE_URLS.length > 0) {
             displaySlide();
-            
-            setInterval(() => {
+            setInterval(function() {
                 currentSlide = (currentSlide + 1) % IMAGE_URLS.length;
                 displaySlide();
             }, SLIDE_DURATION);
